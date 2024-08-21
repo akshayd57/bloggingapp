@@ -52,59 +52,47 @@ export class UserService {
     }
 
 
-    async login(email: string, password: string): Promise<Response<{ email: string, token: string, userId: number, role: string, status: string }>> {
-
-        const response = new Response<{ email: string; token: string; userId: number; role: string; status: string }>;
+    async login(email: string, password: string): Promise<Response<{ email: string; token: string; userId: number; role: string; status: string }>> {
+        const response = new Response<{ email: string; token: string; userId: number; role: string; status: string }>();
 
         try {
             const [result] = await this.databaseService.callProcedure("login", [email]);
 
-            console.log(result)
+            console.log(result);
 
+            if (result.length > 0) {
+                const user = result[0];
+                const storedPassword = user.storedPassword; 
 
-            if (result) {
+                const isPasswordValid = await bcrypt.compare(password, storedPassword);
 
-                const user = result;
-
-                const storedpassword = user.passowrd;
-
-                const ispassowrdvalid = await bcrypt.compare(password, storedpassword)
-
-                if (ispassowrdvalid) {
-                    const userId = user.id;
-                    const role = user.role;
-                    const email = user.email;
-
-                    const status = user.status;
-
+                if (isPasswordValid) {
+                    const { id: userId, email, role, status } = user;
                     const token = this.jwtService.sign(
                         { userId, email, role, status },
-                        { secret: process.env.JWT_SECRET, expiresIn: '1h' },
+                        { secret: process.env.JWT_SECRET, expiresIn: '1h' }
                     );
 
-                    response.data = { token, userId, role, email, status };
-
-                    response.message = "Login Sucessfull";
-
-                    response.status = true
-
+                    response.data = { token, userId, email, role, status };
+                    response.message = "Login successful";
+                    response.status = true;
                 } else {
-
-                    console.log("invalid credeantial")
-                    response.message = "invalid credeantial"
+                    console.log("Invalid credentials");
+                    response.message = "Invalid credentials";
+                    response.status = false;
                 }
-
             } else {
-                console.log("please check result");
-                response.message = "error while getting result"
+                console.log("User not found");
+                response.message = "User not found";
+                response.status = false;
             }
-
         } catch (error) {
-
-            console.log(error)
-            response.message = "error ocuured while login"
+            console.error("Error during login:", error);
+            response.message = "Error occurred during login";
+            response.status = false;
         }
-        return response
+
+        return response;
     }
 
 

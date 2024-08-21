@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
-import { S3ConfigService } from '../config/s3.configservice';
+import { S3ConfigService } from '../config/s3configservice';
 
 @Injectable()
 export class S3Service {
@@ -33,3 +33,4 @@ export class S3Service {
     }
   }
 }
+

@@ -3,7 +3,8 @@ export class CreatePost {
     title: string;
     content: string;
     category: string;
-    image_url?: string;
+    image: any
+
 
 
 }
