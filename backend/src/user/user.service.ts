@@ -5,6 +5,8 @@ import { CreateUser } from 'src/dto/create-user';
 import { Response } from "../dto/response";
 import *  as bcrypt from "bcrypt";
 
+import { UpdateUser } from 'src/dto/update-user';
+
 
 @Injectable()
 export class UserService {
@@ -67,7 +69,8 @@ export class UserService {
                 const isPasswordValid = await bcrypt.compare(password, storedPassword);
 
                 if (isPasswordValid) {
-                    const { id: userId, email, role, status } = user;
+                    const { userId, email, role, status } = user;
+                    console.log("user...",userId)
                     const token = this.jwtService.sign(
                         { userId, email, role, status },
                         { secret: process.env.JWT_SECRET, expiresIn: '1h' }
@@ -155,4 +158,44 @@ export class UserService {
 
     }
 
+
+     async updateUser(updateUser: UpdateUser): Promise<Response<UpdateUser>> {
+
+        const response = new Response<UpdateUser>();
+        const { userId, password, role, username, email, status } = updateUser;
+
+        try {
+            let hashpassword: string | undefined = password;
+            if (password) {
+                hashpassword = await bcrypt.hash(password, 10);
+            }
+
+            const [result] = await this.databaseService.callProcedure('updateUser', [
+                userId,
+                username,
+                email,
+                hashpassword,
+                role,
+                status
+            ]);
+
+            if (result) {
+                response.data = result as UpdateUser;
+                response.status = true;
+                response.message = "updated successfully";
+            } else {
+                response.status = false;
+                response.message = "err while updating the user";
+            }
+            return response;
+
+        } catch (error) {
+            console.log(error, "error during updating user");
+            response.status = false;
+            response.message = "failed to update user";
+            return response;
+        }
+    }
+
 }
+

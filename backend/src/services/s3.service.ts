@@ -16,7 +16,7 @@ export class S3Service {
     });
   }
 
-  async uploadFile(file: Express.Multer.File): Promise<string> {
+  async uploadImage(file: Express.Multer.File): Promise<string> {
     const uploadParams = {
       Bucket: this.bucketName,
       Key: `${Date.now()}_${file.originalname}`,

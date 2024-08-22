@@ -4,6 +4,7 @@ import { DatabaseService } from './../database/database.service';
 import { S3Service } from './../services/s3.service';
 import { Injectable } from '@nestjs/common';
 import { UpdatePost } from 'src/dto/update-post';
+import { String } from 'aws-sdk/clients/acm';
 
 
 
@@ -18,11 +19,11 @@ export class PostsService {
         const response = new Response<CreatePost>();
         let image_url: string = " ";
 
-        const { userId, title, content, category, image } = createPost;
+        const { userId,title, content, category, image } = createPost;
 
         try {
             if (image) {
-                image_url = await this.s3Service.uploadFile(image)
+                image_url = await this.s3Service.uploadImage(image)
             }
 
             const [result] = await this.databaseService.callProcedure("createPost", [userId, title, content, category, image_url])
@@ -49,42 +50,44 @@ export class PostsService {
 
     }
 
+async updatePost(postId: number, userId: number, updatePost: UpdatePost): Promise<Response<UpdatePost>> {
+    const response = new Response<UpdatePost>();
+    try {
+        console.log("update...", postId, userId, updatePost);
 
-    async updatePost(userId: number, updatepost: UpdatePost): Promise<Response<UpdatePost>> {
-        const response = new Response<UpdatePost>();
-        try {
+        const values = [
+            updatePost.title || null,
+            updatePost.category || null,
+            updatePost.content || null,
+            updatePost.image_url || null
+        ];
 
-            const field = Object.keys(updatepost).filter(key => updatepost[key] !== undefined && updatepost[key] !== '')
+        console.log("...values", values);
 
-            const values = field.map(key => updatepost[key]);
+        
+        const [result] = await this.databaseService.callProcedure('UpdatePost', [postId, userId, ...values]);
 
-            if (field.length == 0) {
-                response.message = "No filds to upate";
+        console.log("final", result);
 
-                return response
-
-            }
-
-            const result = await this.databaseService.callProcedure('Updateuser', [userId, ...values]);
-
-            if (result && result.length > 0) {
-
-                response.data = result as UpdatePost;
-                response.status = true,
-                    response.message = "User Updated Successfully"
-            } else {
-                response.message = "error comes while updating user";
-
-            }
-
-        } catch (error) {
-
-            console.log(error, "error comes while updating user");
+        
+        if (result && result.length > 0) {
+            response.data = result as UpdatePost;
+            response.status = true;
+            response.message = "Post updated successfully";
+        } else {
+            response.message = "Failed to update post";
+            response.status = false;
         }
-
-        return response
+    } catch (error) {
+        console.error("Error occurred while updating post:", error);
+        response.message = "Error occurred while updating post";
+        response.status = false;
     }
 
+    return response;
+}
+
+   
 
     async getAllPost(): Promise<Response<CreatePost>> {
 
@@ -125,6 +128,8 @@ export class PostsService {
 
         try {
             const result = await this.databaseService.callProcedure('getPostById', [id]);
+            console.log("result", result);
+            
 
             if (result && result.length > 0) {
                 response.message = "retrived post succesfully";
@@ -149,6 +154,37 @@ export class PostsService {
 
     }
 
+    async deletePost(id: number): Promise<Response<{ title: string }>> {
+    const response = new Response<{ title: string }>();
+    
+    try {
+    
+        const [result] = await this.databaseService.callProcedure("deletePost", [id]);
+
+        console.log("..result",result)
+        
+        
+        if (result> 0) {
+            
+            const title = result[0].title; 
+
+            console.log("title",title)
+            
+            response.message = "deleted successfully";
+            response.data = { title }; 
+            response.status = true;
+        } else {
+            
+            response.status = false;
+        }
+    } catch (error) {
+        console.log(error, "error occurred while deleting post");
+        response.message = "Something went wrong";
+        response.status = false;
+    }
+    
+    return response;
+}
 
 
 }

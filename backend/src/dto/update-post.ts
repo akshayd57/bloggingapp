@@ -1,8 +1,8 @@
 export class UpdatePost {
 
-    Title?: string;
+    title?: string;
     content?: string;
     category?: string;
-    img_url?: string;
+    image_url?: any
 
 }

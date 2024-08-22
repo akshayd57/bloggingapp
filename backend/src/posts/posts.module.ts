@@ -1,3 +1,4 @@
+import { JwtService } from '@nestjs/jwt';
 import { S3ConfigService } from '../config/s3configservice';
 
 import { Module } from '@nestjs/common';
@@ -12,7 +13,7 @@ import { DatabaseService } from 'src/database/database.service';
 
     imports: [ConfigModule.forRoot()],
     exports: [],
-    providers: [S3Service, PostsService, S3ConfigService, DatabaseService],
+    providers: [S3Service, PostsService, S3ConfigService, DatabaseService,JwtService],
     controllers: [PostsController]
 })
 export class PostsModule { }
