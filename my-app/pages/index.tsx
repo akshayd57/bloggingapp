@@ -22,13 +22,23 @@ const Home:FC =()=>{
                 </li>
                 <br />
                 <li>
-                    <Link href="user">Users</Link>
+                    <Link href="userlist">Users</Link>
                 </li>
 
                 <br />
                 <li>
-                <Link href="protected/protectedpage">MY Profile</Link>
-                </li>
+                <Link href="/updateuser">updateuser</Link>
+                    </li>
+                    
+                    <br />
+                    <li>
+ <Link href="/signout" >Signout </Link>
+                    </li>
+
+                    <br />
+                    <li>
+                        <Link  href="/createpost">CreatePost</Link>
+                    </li>
             </ul>
         </nav>
 

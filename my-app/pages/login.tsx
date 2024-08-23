@@ -25,7 +25,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div>
+    <div style={{ maxWidth: '600px', paddingLeft: '400px', paddingBottom:"50px", border: '5px solid #ddd', borderRadius: '50px', marginLeft:"200px", marginTop:"50px" }} >
       <h1>Login</h1>
       <form onSubmit={handleSubmit}>
         <div>
@@ -38,6 +38,7 @@ const LoginPage = () => {
             required
           />
         </div>
+        <br />
         <div>
           <label htmlFor="password">Password</label>
           <input
@@ -48,7 +49,8 @@ const LoginPage = () => {
             required
           />
         </div>
-        <button type="submit">Sign in</button>
+        <br />
+        <button type="submit" style={{border:"1px solid", marginLeft:"50px"}} >Sign in</button>
       </form>
     </div>
   );

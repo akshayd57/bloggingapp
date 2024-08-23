@@ -4,7 +4,7 @@ export class UpdateUser {
     email?: string;
     password?: string;
     role?: string;
-    status?: string;
+    
 }
 
 

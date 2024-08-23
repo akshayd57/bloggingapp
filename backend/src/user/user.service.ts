@@ -54,8 +54,8 @@ export class UserService {
     }
 
 
-    async login(email: string, password: string): Promise<Response<{ email: string; token: string; userId: number; role: string; status: string }>> {
-        const response = new Response<{ email: string; token: string; userId: number; role: string; status: string }>();
+    async login(email: string, password: string): Promise<Response<{ email: string; token: string; userId: number; role: string; }>> {
+        const response = new Response<{ email: string; token: string; userId: number; role: string;}>();
 
         try {
             const [result] = await this.databaseService.callProcedure("login", [email]);
@@ -69,14 +69,14 @@ export class UserService {
                 const isPasswordValid = await bcrypt.compare(password, storedPassword);
 
                 if (isPasswordValid) {
-                    const { userId, email, role, status } = user;
+                    const { userId, email, role, } = user;
                     console.log("user...",userId)
                     const token = this.jwtService.sign(
-                        { userId, email, role, status },
+                        { userId, email, role,  },
                         { secret: process.env.JWT_SECRET, expiresIn: '1h' }
                     );
 
-                    response.data = { token, userId, email, role, status };
+                    response.data = { token, userId, email, role, };
                     response.message = "Login successful";
                     response.status = true;
                 } else {
@@ -162,7 +162,7 @@ export class UserService {
      async updateUser(updateUser: UpdateUser): Promise<Response<UpdateUser>> {
 
         const response = new Response<UpdateUser>();
-        const { userId, password, role, username, email, status } = updateUser;
+        const { userId, password, role, username, email } = updateUser;
 
         try {
             let hashpassword: string | undefined = password;
@@ -176,7 +176,7 @@ export class UserService {
                 email,
                 hashpassword,
                 role,
-                status
+                
             ]);
 
             if (result) {

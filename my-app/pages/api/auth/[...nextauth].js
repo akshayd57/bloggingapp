@@ -15,34 +15,33 @@ export default NextAuth({
             },
             body: JSON.stringify({
               email: credentials.email,
-              password: credentials.password, 
+              password: credentials.password,
             }),
           });
 
           if (!response.ok) {
-            
-            console.log("error")
-          
+            console.log("error");
+            return null;
           }
 
           let user = await response.json();
 
-          user=user.data
+          user = user.data;
           console.log(".....user", user);
 
           if (user && user.token) {
             return {
-              id: user.userId,
+              userId: user.userId,   
               role: user.role,
               token: user.token,
-              email:user.email
+              email: user.email
             };
           } else {
             console.log("Invalid credentials");
             return null;
           }
         } catch (error) {
-          console.log()
+          console.log(error);
           return null;
         }
       },
@@ -52,31 +51,36 @@ export default NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    
     async jwt({ token, user }) {
-      console.log(".....user",user);
-      console.log(".....tt",token)
+      console.log(".....user", user);
+      console.log(".....tt", token);
+
       if (user) {
-        token.id = user.userId;
+        token.userId = user.userId; 
         token.role = user.role;
         token.token = user.token;
-        token.email=user.email
+        token.email = user.email;
+        token.exp = Math.floor(Date.now() / 1000) + 60 * 60; 
       }
-    
+
+      if (token.exp && token.exp < Math.floor(Date.now() / 1000)) {
+        return null;
+      }
+
       return token;
     },
     async session({ session, token }) {
-
-      console.log(".....tokens",token)
+      console.log(".....tokens", token);
       if (token) {
-        session.user= {
-          id: token.id,
+        session.user = {
+          id: token.userId, 
           role: token.role,
           token: token.token,
-          email:token.email
+          email: token.email
         };
+        session.expires = new Date(token.exp * 1000).toISOString();
       }
-      console.log('.....sesssions',session)
+      console.log('.....sesssions', session);
       return session;
     },
   },

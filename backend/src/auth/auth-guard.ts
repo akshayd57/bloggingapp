@@ -42,6 +42,7 @@ export class AuthGuard implements CanActivate {
             })
 
             request.user = decoded;
+            
 
             
             return true
